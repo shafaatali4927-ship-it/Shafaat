@@ -1,9 +1,0 @@
-python-telegram-bot[job-queue]==20.7
-openai-whisper
-gfpgan
-realesrgan
-basicsr
-facexlib
-ffmpeg-python
-opencv-python-headless
-numpy
