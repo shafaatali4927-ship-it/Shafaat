@@ -1,0 +1,40 @@
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y \
+    ffmpeg git wget libgl1 libglib2.0-0 libsm6 libxext6 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Torch pinned — torchvision functional_tensor fix
+RUN pip install --no-cache-dir \
+    torch==2.0.1 \
+    torchvision==0.15.2 \
+    --index-url https://download.pytorch.org/whl/cpu
+
+# Main packages
+RUN pip install --no-cache-dir \
+    "python-telegram-bot[job-queue]==20.7" \
+    openai-whisper \
+    ffmpeg-python \
+    opencv-python-headless \
+    numpy==1.24.4 \
+    scipy \
+    Pillow
+
+# GFPGAN stack
+RUN pip install --no-cache-dir facexlib
+RUN pip install --no-cache-dir basicsr --no-deps
+RUN pip install --no-cache-dir gfpgan --no-deps
+RUN pip install --no-cache-dir realesrgan --no-deps
+
+# Models download
+RUN mkdir -p models && \
+    wget -q -O models/GFPGANv1.4.pth \
+    https://github.com/TencentARC/GFPGAN/releases/download/v1.3.4/GFPGANv1.4.pth && \
+    wget -q -O models/RealESRGAN_x4plus.pth \
+    https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth
+
+COPY bot.py .
+
+CMD ["python", "bot.py"]
